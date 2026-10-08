@@ -1,0 +1,39 @@
+Coupon redemption service — candidate brief
+AI-assisted coding round · Backend (Node.js, Java, Python, or any language of choice, MySQL)
+
+
+
+You are building a coupon redemption service for an e-commerce checkout.
+
+Each coupon has: code, max_redemptions (total times it can ever be used, ever), discount_percent, expires_at, and type (STANDARD or STACKABLE). Rules:
+
+A coupon cannot be redeemed more than max_redemptions times — even under a burst of simultaneous checkouts on a flash-sale coupon.
+A STANDARD coupon can only be redeemed once per customer_id, ever.
+A STACKABLE coupon (e.g. referral codes) has no per-customer limit, but still respects max_redemptions globally.
+A coupon redeemed after expires_at must be rejected — but a redemption in flight at the exact expiry instant must resolve consistently, not by luck of thread scheduling.
+Orders can be cancelled. Canceling an order that uses a coupon must give the redemption slot back (redeemed_count decrements) — but only once per order, even if the cancellation endpoint is called twice.
+Retrying the same redemption request (network client retries after a timeout, doesn't know if the first one landed) must not double-redeem. Callers send an Idempotency-Key header on POST /redeem.
+
+API:
+
+POST /coupons → { code, max_redemptions, discount_percent, expires_at, type } — seed data.
+POST /redeem (header: Idempotency-Key) → { code, customer_id, order_id } → { success: true, remaining } or a clear, distinct error per failure mode (already used / no redemptions left / expired / unknown code / idempotency replay).
+POST /orders/:order_id/cancel → reverses the coupon redemption tied to that order, if any. Calling it twice must be a no-op the second time, not a double refund of the slot.
+GET /coupons/:code → { redeemed_count, remaining, max_redemptions } — this number must be correct at all times, not eventually correct.
+
+You must also ship:
+
+A MySQL schema (migrations or schema file) — you own it, no framework auto-generating it for you.
+A concurrency test that: fires more simultaneous POST /redeem calls than max_redemptions allows and proves the final count is exact; retries one request with the same Idempotency-Key twice and proves it's charged once; calls cancel twice on the same order and proves the slot is only returned once.
+Run this test against two instances of your app process pointed at the same MySQL — not just one process with a thread pool. If your correctness lives in an in-memory lock, this will expose it.
+A README: how to run it (Docker Compose for MySQL is fine), and how you verified each rule above.
+
+NOTE:
+Node.js, Java, Python or any language of your choice. 
+MySQL is required. 
+AI is allowed.
+
+Prioritize: 
+The redemption cap is provably exact under concurrency
+Cancellation reversal 
+Everything else. Say what you cut and why.

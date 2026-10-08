@@ -1,0 +1,30 @@
+{
+  "name": "yellowai_project",
+  "version": "1.0.0",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node test/concurrency.test.js",
+    "test:all": "node test/concurrency.test.js --case=all",
+    "test:cap": "node test/concurrency.test.js --case=cap",
+    "test:idempotency": "node test/concurrency.test.js --case=idempotency",
+    "test:cancel": "node test/concurrency.test.js --case=cancel",
+    "test:standard": "node test/concurrency.test.js --case=standard",
+    "test:expiry": "node test/concurrency.test.js --case=expiry",
+    "test:unknown": "node test/concurrency.test.js --case=unknown"
+  },
+  "keywords": [
+    "coupon",
+    "concurrency",
+    "idempotency",
+    "mysql"
+  ],
+  "author": "",
+  "license": "ISC",
+  "description": "High-concurrency coupon redemption service with MySQL transactional guarantees",
+  "dependencies": {
+    "dotenv": "^18.0.5",
+    "express": "^5.2.1",
+    "mysql2": "^3.24.5"
+  }
+}
